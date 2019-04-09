@@ -6,9 +6,16 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+
+import com.spotify.android.appremote.api.SpotifyAppRemote;
+
+import static com.example.undermusic.MainActivity.mSpotifyAppRemote;
+import static com.example.undermusic.MainActivity.playlistAct;
 
 
 /**
@@ -60,13 +67,24 @@ public class Reproductor extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_reproductor, container, false);
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_reproductor, container, false);
+        Button bRepro = (Button) rootView.findViewById(R.id.bReproducir);
+
+        bRepro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("aquiiii",playlistAct);
+                mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:"+playlistAct);
+            }
+        });
+        return rootView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

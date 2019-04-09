@@ -16,6 +16,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     buildToolsVersion '28.0.3'
 }
 
@@ -34,4 +38,13 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
 
     implementation project(':spotify-auth-release-1.1.0')
+
+    implementation project(':okio-1.15.0')
+
+    implementation project(':okhttp-3.14.0')
+
+    implementation 'com.squareup.picasso:picasso:2.5.2'
+
+    implementation 'com.squareup.retrofit:retrofit:1.9.0'
+
 }

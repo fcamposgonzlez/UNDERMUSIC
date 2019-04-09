@@ -1,7 +1,9 @@
 package com.example.undermusic;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -11,6 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.spotify.sdk.android.authentication.AuthenticationResponse;
+
+import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -32,6 +38,9 @@ public class GenerarPlaylist extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    Button bGenerarPlaylist;
+    private AuthenticationResponse response;
 
     public GenerarPlaylist() {
         // Required empty public constructor
@@ -64,13 +73,44 @@ public class GenerarPlaylist extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_generar_playlist, container, false);
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_generar_playlist, container, false);
+        bGenerarPlaylist = (Button) rootView.findViewById(R.id.bGenPlaylist);
+        bGenerarPlaylist.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String resul = "2";
+                try {
+                    resul = new GenPLaylist(getResponse()).execute().get();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if (resul == "0"){
+                    Toast.makeText(getActivity(), "Error en la creación", Toast.LENGTH_SHORT).show();
+                }
+                else if (resul == "1"){
+                    Toast.makeText(getActivity(), "Playlist creada, yaih!", Toast.LENGTH_SHORT).show();
+                    Intent launchIntent = getActivity().getPackageManager().getLaunchIntentForPackage("com.spotify.music");
+                    if (launchIntent != null) {
+                        startActivity(launchIntent);//null pointer check in case package name was not found
+                    }
+                }
+                else{
+                    Toast.makeText(getActivity(), "no se que pasó", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        // Inflate the layout for this fragment
+        return rootView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -95,6 +135,14 @@ public class GenerarPlaylist extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    public AuthenticationResponse getResponse() {
+        return response;
+    }
+
+    public void setResponse(AuthenticationResponse response) {
+        this.response = response;
     }
 
     /**

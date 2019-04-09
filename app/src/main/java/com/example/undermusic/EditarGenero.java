@@ -9,6 +9,13 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+
+import static com.example.undermusic.MainActivity.ArtistasGeneral;
+import static com.example.undermusic.MainActivity.GeneroGeneral;
 
 
 /**
@@ -30,6 +37,8 @@ public class EditarGenero extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    private static EditText edittext;
 
     public EditarGenero() {
         // Required empty public constructor
@@ -65,8 +74,28 @@ public class EditarGenero extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_editar_genero, container, false);
+        View view =  inflater.inflate(R.layout.fragment_editar_genero,
+                container, false);
+        edittext = (EditText) view.findViewById(R.id.editText1);
+
+        final Button button =
+                (Button) view.findViewById(R.id.button1);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                buttonClicked(v);
+            }
+        });
+
+        ArrayAdapter adapter = new ArrayAdapter<String>(this.getActivity(),
+                R.layout.fragment_editar_genero,R.id.label, GeneroGeneral);
+
+        ListView listView = (ListView) view.findViewById(R.id.mobile_list);
+        listView.setAdapter(adapter);
+        return view;
+    }
+
+    public void buttonClicked (View view) {
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event

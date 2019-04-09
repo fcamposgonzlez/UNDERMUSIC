@@ -2,6 +2,7 @@ package com.example.undermusic;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -32,7 +33,23 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
 
 import android.util.Log;
+import android.widget.TextView;
+
 import androidx.fragment.app.Fragment;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import org.json.JSONObject;
 
 
 
@@ -43,10 +60,16 @@ public class MainActivity extends AppCompatActivity
 
     private static final String CLIENT_ID = "43455e8ed37542e8b4a4ed8dc5df70ce";
     private static final String REDIRECT_URI = "http://localhost:8888/callback";
-    private SpotifyAppRemote mSpotifyAppRemote;
+    public static SpotifyAppRemote mSpotifyAppRemote;
 
     private static final int REQUEST_CODE = 1337;
 
+    private TextView txtShowTextResult;
+    private AuthenticationResponse response;
+
+    public static String playlistAct = "37i9dQZF1DX2sUQwD7tbmL";
+    public static List<String> ArtistasGeneral = new ArrayList<String>();
+    public static List<String> GeneroGeneral = new ArrayList<String>();
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -54,17 +77,17 @@ public class MainActivity extends AppCompatActivity
 
         // Check if result comes from the correct activity
         if (requestCode == REQUEST_CODE) {
-            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-
+            this.response = AuthenticationClient.getResponse(resultCode, intent);
+            txtShowTextResult = findViewById(R.id.princi);
             switch (response.getType()) {
                 // Response was successful and contains auth token
                 case TOKEN:
-                    // Handle successful response
+                    txtShowTextResult.setText("Conectado, Use el Menu para navegar.");
                     break;
-
                 // Auth flow returned an error
                 case ERROR:
                     // Handle error response
+                    txtShowTextResult.setText("Error de Comunicación con Servidor");
                     break;
 
                 // Most likely auth flow was cancelled
@@ -73,6 +96,8 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
+
+
 
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
@@ -105,15 +130,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -165,12 +181,14 @@ public class MainActivity extends AppCompatActivity
 
         Fragment fragment = null;
         Boolean fragmentoSelecionado = false;
-
+        int seleccionFrag = 0;
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
             fragment = new GenerarPlaylist();
+            ((GenerarPlaylist) fragment).setResponse(this.response);
             fragmentoSelecionado = true;
+
 
         } else if (id == R.id.nav_gallery) {
             fragment = new Reproductor();
@@ -192,6 +210,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         if (fragmentoSelecionado){
+
             getSupportFragmentManager().beginTransaction().replace(R.id.Contenedor, fragment).commit();
         }
 
@@ -213,7 +232,7 @@ public class MainActivity extends AppCompatActivity
         // We will start writing our code here.
         // Set the connection parameters
 
-        /*
+
         ConnectionParams connectionParams =
                 new ConnectionParams.Builder(CLIENT_ID)
                         .setRedirectUri(REDIRECT_URI)
@@ -229,7 +248,6 @@ public class MainActivity extends AppCompatActivity
                         Log.d("MainActivity", "Connected! Yay!");
 
                         // Now you can start interacting with App Remote
-                        connected();
                     }
 
                     @Override
@@ -238,11 +256,15 @@ public class MainActivity extends AppCompatActivity
 
                         // Something went wrong when attempting to connect! Handle errors here
                     }
-                });*/
+                });
 
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
 
-        builder.setScopes(new String[]{"streaming"});
+        builder.setScopes(new String[]{"user-read-recently-played","user-top-read","user-library-modify",
+        "user-library-read","playlist-read-private","playlist-modify-public","playlist-modify-private",
+        "playlist-read-collaborative","user-read-email","user-read-birthdate","user-read-private",
+        "user-read-playback-state","user-modify-playback-state","user-read-currently-playing",
+        "app-remote-control","streaming","user-follow-read","user-follow-modify"});
         AuthenticationRequest request = builder.build();
 
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
